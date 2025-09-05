@@ -1,6 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// --- LOGIN PAGE COMPONENTS ---
+// --- A SIMPLE DASHBOARD TO SHOW AFTER LOGIN ---
+const Dashboard = ({ onLogout }) => (
+    <div className="flex flex-col items-center justify-center min-h-screen font-sans bg-gradient-to-br from-green-100 to-blue-100 p-4 text-center">
+        <div className="bg-white p-10 rounded-2xl shadow-xl">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Login Successful!</h1>
+            <p className="text-gray-600 mb-8">Welcome to the Manas Dashboard.</p>
+            <button
+                onClick={onLogout}
+                className="bg-rose-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 shadow-md transform hover:scale-105 active:scale-100 transition duration-300"
+            >
+                Log Out
+            </button>
+        </div>
+    </div>
+);
+
+
+// --- LOGIN PAGE COMPONENTS (Your original code, unchanged) ---
 
 const LoginEyeIcon = ({ className = "w-6 h-6" }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -21,17 +38,19 @@ const GoogleIcon = () => (
 );
 
 const IllustrationPanel = () => (
-    <div className="hidden lg:flex w-1/2 h-full relative items-center justify-center p-12 bg-gradient-to-br from-pink-50 via-white to-rose-100 rounded-l-2xl">
-        <div className="absolute top-8 left-8 text-2xl font-pacifico text-gray-700">Manas</div>
-        <div className="transform transition-transform duration-500 hover:scale-105 w-full max-w-md">
+    <div className="hidden lg:flex w-full h-[92%] mt-[1.5rem] ml-[20px] bg-[#ffe6df] rounded-lg relative">
+        <div className="absolute top-1 left-2 text-3xl text-[#d1265b] font-pacifico ">Manas</div>
+        <div>
+            {/* Using a placeholder image source for compatibility */}
             <img
-                src="https://storage.googleapis.com/gemini-prod-us-west1-assets/image_3ca153.jpg"
+                src="../public/assets/second_login.png" // Replace with your actual image path if needed
                 alt="Friendly character illustration for Manas app"
-                className="w-full h-auto"
+                className="scale-160 h-auto translate-x-[133px] -translate-y-8"
             />
         </div>
     </div>
 );
+
 
 const LoginFormInput = ({ id, type, placeholder, value, onChange, error, children, disabled }) => (
     <div>
@@ -59,7 +78,9 @@ const GoogleButton = ({ onClick }) => (
 
 const AuthCard = ({ children, screen }) => (
     <div key={screen} className="w-full max-w-4xl flex bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
-        <IllustrationPanel />
+        <div className='hidden lg:block lg:w-1/2'>
+            <IllustrationPanel />
+        </div>
         <div className="w-full lg:w-1/2 p-8 sm:p-12 flex flex-col justify-center">
             {children}
         </div>
@@ -78,28 +99,63 @@ const WelcomeScreen = ({ setScreen }) => (
     </AuthCard>
 );
 
+
+// --- UPDATED SignInScreen Component ---
 const SignInScreen = ({ setScreen, onLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = (e) => {
         e.preventDefault();
-        console.log("Attempting to log in with:", { email, password });
-        if (onLoginSuccess) onLoginSuccess();
-    };
+        setError('');
+        setIsLoading(true);
 
+        // Simulate an API call
+        setTimeout(() => {
+            // Check against mock credentials
+            if (email === 'user@example.com' && password === 'password123') {
+                console.log("Login successful!");
+                onLoginSuccess();
+            } else {
+                console.log("Login failed: Invalid credentials.");
+                setError('Invalid email or password. Please try again.');
+            }
+            setIsLoading(false);
+        }, 1500); // 1.5 second delay
+    };
+    
     const handleGoogleLogin = () => {
         console.log("Attempting to log in with Google.");
-        if (onLoginSuccess) onLoginSuccess();
+        // In a real app, this would trigger the Google Auth flow.
+        // For this demo, we'll just simulate a successful login.
+        onLoginSuccess();
     };
 
     return (
         <AuthCard screen="signin">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Login</h1>
             <form className="space-y-5" onSubmit={handleLogin}>
-                <LoginFormInput id="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <LoginFormInput id="password" type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}>
+                <LoginFormInput 
+                    id="email" 
+                    type="email" 
+                    placeholder="Email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    // Display a general error message at the top if needed
+                />
+                <LoginFormInput 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    error={error} // Pass the error specifically to the password field for display
+                >
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-700">
                         {showPassword ? <LoginEyeOffIcon className="w-5 h-5" /> : <LoginEyeIcon className="w-5 h-5" />}
                     </button>
@@ -107,7 +163,9 @@ const SignInScreen = ({ setScreen, onLoginSuccess }) => {
                 <div className="text-right">
                     <button type="button" onClick={() => setScreen('forgotpassword')} className="text-sm font-semibold text-yellow-600 hover:underline">Forgot Password?</button>
                 </div>
-                <LoginPrimaryButton type="submit">Log In</LoginPrimaryButton>
+                <LoginPrimaryButton type="submit" disabled={isLoading}>
+                    {isLoading ? 'Logging in...' : 'Log In'}
+                </LoginPrimaryButton>
             </form>
             <div className="my-6 flex items-center"><span className="flex-grow h-px bg-gray-200"></span><span className="mx-4 text-sm font-medium text-gray-400">Or</span><span className="flex-grow h-px bg-gray-200"></span></div>
             <GoogleButton onClick={handleGoogleLogin} />
@@ -136,7 +194,7 @@ const SignUpScreen = ({ setScreen }) => {
     );
 };
 
-// --- OTP Input Component ---
+// --- OTP Input Component (Your original code, unchanged) ---
 const OtpInput = ({ length = 4, onComplete }) => {
     const [otp, setOtp] = useState(new Array(length).fill(""));
     const inputRefs = useRef([]);
@@ -147,17 +205,12 @@ const OtpInput = ({ length = 4, onComplete }) => {
 
     const handleChange = (element, index) => {
         if (isNaN(element.value)) return;
-
         const newOtp = [...otp];
         newOtp[index] = element.value;
         setOtp(newOtp);
-
-        // Focus next input
         if (element.nextSibling && element.value) {
             element.nextSibling.focus();
         }
-
-        // Trigger onComplete
         const otpString = newOtp.join("");
         if (otpString.length === length) {
             onComplete(otpString);
@@ -165,7 +218,6 @@ const OtpInput = ({ length = 4, onComplete }) => {
     };
 
     const handleKeyDown = (e, index) => {
-        // Move focus to previous input on backspace
         if (e.key === "Backspace" && !otp[index] && index > 0) {
             inputRefs.current[index - 1].focus();
         }
@@ -175,10 +227,7 @@ const OtpInput = ({ length = 4, onComplete }) => {
         <div className="flex justify-center space-x-2">
             {otp.map((data, index) => (
                 <input
-                    key={index}
-                    type="text"
-                    maxLength="1"
-                    value={data}
+                    key={index} type="text" maxLength="1" value={data}
                     onChange={(e) => handleChange(e.target, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     ref={(el) => (inputRefs.current[index] = el)}
@@ -190,57 +239,41 @@ const OtpInput = ({ length = 4, onComplete }) => {
 };
 
 
-// --- UPDATED ForgotPasswordScreen Component ---
+// --- ForgotPasswordScreen Component (Your original code, unchanged) ---
 const ForgotPasswordScreen = ({ setScreen }) => {
-    const [step, setStep] = useState('enterEmail'); // 'enterEmail', 'enterOtp', 'success'
+    const [step, setStep] = useState('enterEmail');
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
-    };
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
 
     const handleEmailSubmit = (e) => {
         e.preventDefault();
         setError('');
-
-        if (!email) {
-            setError('Email address is required.');
-            return;
-        }
-        if (!validateEmail(email)) {
+        if (!email || !validateEmail(email)) {
             setError('Please enter a valid email address.');
             return;
         }
-
         setIsLoading(true);
-        // Simulate sending OTP
         setTimeout(() => {
             setIsLoading(false);
             setStep('enterOtp');
-            console.log('OTP sent to:', email);
         }, 1500);
     };
     
     const handleOtpSubmit = (e) => {
         e.preventDefault();
         setError('');
-        
-        // For demonstration, the correct OTP is "1234"
         if (otp !== '1234') {
             setError('Invalid OTP. Please try again.');
             return;
         }
-        
         setIsLoading(true);
-        // Simulate OTP verification
         setTimeout(() => {
             setIsLoading(false);
             setStep('success');
-            console.log('OTP verified successfully');
         }, 1500);
     };
 
@@ -250,9 +283,7 @@ const ForgotPasswordScreen = ({ setScreen }) => {
                 return (
                     <>
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">Enter OTP</h1>
-                        <p className="text-gray-600 mb-6">
-                            A 4-digit code was sent to <span className="font-semibold">{email}</span>.
-                        </p>
+                        <p className="text-gray-600 mb-6">A 4-digit code was sent to <span className="font-semibold">{email}</span>.</p>
                         <form className="space-y-5" onSubmit={handleOtpSubmit}>
                             <OtpInput length={4} onComplete={setOtp} />
                              {error && <p className="text-xs text-red-500 mt-1 text-center">{error}</p>}
@@ -260,9 +291,7 @@ const ForgotPasswordScreen = ({ setScreen }) => {
                                 {isLoading ? 'Verifying...' : 'Verify OTP'}
                             </LoginPrimaryButton>
                         </form>
-                         <p className="text-sm text-center text-gray-500 mt-8">
-                            <button onClick={() => setStep('enterEmail')} className="font-semibold text-gray-700 hover:underline">&larr; Change Email</button>
-                        </p>
+                         <p className="text-sm text-center text-gray-500 mt-8"><button onClick={() => setStep('enterEmail')} className="font-semibold text-gray-700 hover:underline">&larr; Change Email</button></p>
                     </>
                 );
             case 'success':
@@ -272,9 +301,7 @@ const ForgotPasswordScreen = ({ setScreen }) => {
                             <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">Check your inbox</h1>
-                        <p className="text-gray-600 mb-6">
-                            An email has been sent to <span className="font-semibold text-gray-800">{email}</span> with instructions to reset your password.
-                        </p>
+                        <p className="text-gray-600 mb-6">An email has been sent to <span className="font-semibold text-gray-800">{email}</span> with instructions to reset your password.</p>
                         <button onClick={() => setScreen('signin')} className="font-semibold text-gray-700 hover:underline">&larr; Back to Login</button>
                     </div>
                 );
@@ -285,42 +312,20 @@ const ForgotPasswordScreen = ({ setScreen }) => {
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">Forgot Password?</h1>
                         <p className="text-gray-600 mb-6">No worries, we'll send you reset instructions.</p>
                         <form className="space-y-5" onSubmit={handleEmailSubmit}>
-                            <LoginFormInput
-                                id="reset-email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                error={error}
-                                disabled={isLoading}
-                            />
+                            <LoginFormInput id="reset-email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} disabled={isLoading} />
                             <LoginPrimaryButton type="submit" disabled={isLoading}>
                                 {isLoading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Sending...
-                                    </>
-                                ) : (
-                                    'Send OTP'
-                                )}
+                                    <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sending...</>
+                                ) : 'Send OTP'}
                             </LoginPrimaryButton>
                         </form>
-                        <p className="text-sm text-center text-gray-500 mt-8">
-                            <button onClick={() => setScreen('signin')} className="font-semibold text-gray-700 hover:underline">&larr; Back to Login</button>
-                        </p>
+                        <p className="text-sm text-center text-gray-500 mt-8"><button onClick={() => setScreen('signin')} className="font-semibold text-gray-700 hover:underline">&larr; Back to Login</button></p>
                     </>
                 );
         }
     };
 
-    return (
-        <AuthCard screen="forgotpassword">
-            {renderContent()}
-        </AuthCard>
-    );
+    return <AuthCard screen="forgotpassword">{renderContent()}</AuthCard>;
 };
 
 
@@ -343,9 +348,13 @@ const LoginPage = ({ onLoginSuccess }) => {
     );
 };
 
-export default function App({ onLoginSuccess }) {
-    return (
-        <LoginPage onLoginSuccess={onLoginSuccess} />
-    );
-}
+// --- MAIN APP COMPONENT ---
+export default function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    if (isLoggedIn) {
+        return <Dashboard onLogout={() => setIsLoggedIn(false)} />;
+    }
+
+    return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
+}
