@@ -1,30 +1,25 @@
+// src/main.jsx
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import Home from './Home.jsx';
-
-import TherapyPage from "./TherapyPage.jsx";// No need to import './index.css' if styles are injected via <style> tag
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-// However, in a real project, this is where your main CSS import would typically go.
+import TherapyPage from './TherapyPage.jsx';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './index.css';
+
 function MainApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
+  const handleLoginSuccess = () => setIsLoggedIn(true);
+  const handleLogout = () => setIsLoggedIn(false);
 
   return (
     <>
-      {/* Global Styles for the entire application */}
+      {/* Global Styles */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Lora:wght@700&family=Poppins:wght@400;500;600;700&display=swap');
-          
+
           body { 
             font-family: 'Poppins', sans-serif; 
           }
@@ -47,12 +42,24 @@ function MainApp() {
           }
         `}
       </style>
-      
-      {isLoggedIn ? (
-        <Home onLogout={handleLogout} />
-      ) : (
-        <App onLoginSuccess={handleLoginSuccess} />
-      )}
+
+      <Router>
+        {!isLoggedIn ? (
+          // Show login page if not logged in
+          <App onLoginSuccess={handleLoginSuccess} />
+        ) : (
+          // Show protected routes if logged in
+          <Routes>
+            <Route path="/" element={<Home onLogout={handleLogout} />} />
+            <Route path="/therapy" element={<TherapyPage onLogout={handleLogout} />} />
+            {/* Placeholder routes for future pages */}
+            <Route path="/assessment" element={<Home onLogout={handleLogout} />} />
+            <Route path="/guides" element={<Home onLogout={handleLogout} />} />
+            {/* Redirect any unknown route to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        )}
+      </Router>
     </>
   );
 }
@@ -60,5 +67,5 @@ function MainApp() {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <MainApp />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

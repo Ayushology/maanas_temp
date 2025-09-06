@@ -1,22 +1,32 @@
-import React from 'react';
+// src/TherapyPage.jsx
 
-// Reusing components from other files to maintain a consistent UI
-// You would have these in a shared components file in a real app
-const Header = ({ onLogout, onNavigate }) => (
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Header = ({ onLogout }) => (
     <header className="relative z-10 container mx-auto px-6 py-4 flex justify-between items-center text-gray-800">
-        <h1 className="text-3xl font-lora font-bold cursor-pointer" onClick={() => onNavigate('home')}>Manas</h1>
+        
+        {/* The logo is now a Link to the homepage */}
+        <Link to="/" className="text-3xl font-lora font-bold cursor-pointer">
+            Manas
+        </Link>
+        
         <nav className="hidden md:flex space-x-8 items-center">
-            {['Home', 'Therapy', 'Assessment', 'Guides'].map(item => (
-                <a 
-                    href="#" 
-                    key={item} 
-                    onClick={() => onNavigate(item.toLowerCase())}
-                    className="text-gray-600 hover:text-pink-500 transition-colors duration-300 font-medium"
-                >
-                    {item}
-                </a>
-            ))}
+            {/* Navigation items are now Link components with a 'to' prop */}
+            <Link to="/" className="text-gray-600 hover:text-pink-500 transition-colors duration-300 font-medium">
+                Home
+            </Link>
+            <Link to="/therapy" className="text-gray-600 hover:text-pink-500 transition-colors duration-300 font-medium">
+                Therapy
+            </Link>
+            <Link to="/assessment" className="text-gray-600 hover:text-pink-500 transition-colors duration-300 font-medium">
+                Assessment
+            </Link>
+            <Link to="/guides" className="text-gray-600 hover:text-pink-500 transition-colors duration-300 font-medium">
+                Guides
+            </Link>
         </nav>
+        
         <div className="flex items-center space-x-4">
             <button className="bg-pink-400 p-2 rounded-full shadow-md hover:bg-pink-500 transition-all duration-300">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
